@@ -59,16 +59,20 @@ public class HomeController implements Initializable {
             }
         });
 
-        searchBtn.setOnAction( actionEvent -> {
-            observableMovies.clear();
-            String searchQuery = searchField.getText().toLowerCase();
-            Genre selectedGenre = genreComboBox.getSelectionModel().getSelectedItem();
-
-            var filteredMovies = allMovies.stream()
-                    .filter(movie -> movie.containsQueryString(searchQuery) && movie.hasGenre(selectedGenre))
-                    .collect(Collectors.toList());
-
-            observableMovies.addAll(filteredMovies);
+        searchBtn.setOnAction( (actionEvent) -> {
+            searchAction();
         });
+    }
+
+    void searchAction(){
+        observableMovies.clear();
+        String searchQuery = searchField.getText().toLowerCase();
+        Genre selectedGenre = genreComboBox.getSelectionModel().getSelectedItem();
+
+        var filteredMovies = allMovies.stream()
+                .filter(movie -> movie.containsQueryString(searchQuery) && movie.hasGenre(selectedGenre))
+                .collect(Collectors.toList());
+
+        observableMovies.addAll(filteredMovies);
     }
 }
