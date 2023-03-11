@@ -7,6 +7,7 @@ import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXListView;
 import javafx.animation.PauseTransition;
+import javafx.event.ActionEvent;
 import javafx.util.Duration;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -21,6 +22,8 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 public class HomeController implements Initializable {
+    private final static String ASCENDING = "Sort (asc)";
+    private final static String DESCENDING = "Sort (desc)";
     @FXML
     public JFXButton searchBtn;
 
@@ -51,28 +54,28 @@ public class HomeController implements Initializable {
         genreComboBox.setPromptText("Filter by Genre");
         genreComboBox.getItems().addAll( Genre.values() );
 
-        sortBtn.setOnAction(actionEvent -> {
-            if(sortBtn.getText().equals("Sort (asc)")) {
-                observableMovies.sort(Comparator.comparing(Movie::getTitle));
-                sortBtn.setText("Sort (desc)");
-            } else {
-                observableMovies.sort(Comparator.comparing(Movie::getTitle).reversed());
-                sortBtn.setText("Sort (asc)");
-            }
-        });
+        sortBtn.setOnAction(this::toggleSortOrder);
 
-        searchBtn.setOnAction( (actionEvent) -> {
-            searchAction();
-        });
+        searchBtn.setOnAction(this::searchAction);
 
         PauseTransition searchDebounce = new PauseTransition(Duration.millis(500));
-        searchDebounce.setOnFinished(event -> searchAction());
+        searchDebounce.setOnFinished(this::searchAction);
         searchField.textProperty().addListener((observable, old, newVal) -> {
             searchDebounce.playFromStart();
         });
     }
 
-    void searchAction(){
+    private void toggleSortOrder(ActionEvent actionEvent) {
+        if(sortBtn.getText().equals(ASCENDING)) {
+            observableMovies.sort(Comparator.comparing(Movie::getTitle));
+            sortBtn.setText(DESCENDING);
+        } else {
+            observableMovies.sort(Comparator.comparing(Movie::getTitle).reversed());
+            sortBtn.setText(ASCENDING);
+        }
+    }
+
+    void searchAction(ActionEvent actionEvent) {
         observableMovies.clear();
         String searchQuery = searchField.getText().toLowerCase();
         Genre selectedGenre = genreComboBox.getSelectionModel().getSelectedItem();
