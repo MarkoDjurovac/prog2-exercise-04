@@ -6,6 +6,8 @@ import at.ac.fhcampuswien.fhmdb.ui.MovieCell;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXListView;
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -61,6 +63,12 @@ public class HomeController implements Initializable {
 
         searchBtn.setOnAction( (actionEvent) -> {
             searchAction();
+        });
+
+        PauseTransition searchDebounce = new PauseTransition(Duration.millis(500));
+        searchDebounce.setOnFinished(event -> searchAction());
+        searchField.textProperty().addListener((observable, old, newVal) -> {
+            searchDebounce.playFromStart();
         });
     }
 
