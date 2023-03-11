@@ -1,4 +1,4 @@
-package at.ac.fhcampuswien.fhmdb.repositories.movie;
+package at.ac.fhcampuswien.fhmdb.provider.movie;
 
 import at.ac.fhcampuswien.fhmdb.models.Movie;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,12 +8,12 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class MockMovieRepositoryTest {
-    private MockMovieRepository repository;
+public class MockMovieProviderTest {
+    private MockMovieProvider repository;
 
     @BeforeEach
     public void setupTest(){
-            repository = new MockMovieRepository();
+            repository = new MockMovieProvider();
     }
 
     @Test

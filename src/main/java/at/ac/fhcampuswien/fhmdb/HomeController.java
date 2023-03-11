@@ -2,8 +2,8 @@ package at.ac.fhcampuswien.fhmdb;
 
 import at.ac.fhcampuswien.fhmdb.models.Genre;
 import at.ac.fhcampuswien.fhmdb.models.Movie;
-import at.ac.fhcampuswien.fhmdb.repositories.movie.MockMovieRepository;
-import at.ac.fhcampuswien.fhmdb.repositories.movie.MovieRepository;
+import at.ac.fhcampuswien.fhmdb.provider.movie.MockMovieProvider;
+import at.ac.fhcampuswien.fhmdb.provider.movie.MovieProvider;
 import at.ac.fhcampuswien.fhmdb.ui.MovieCell;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
@@ -19,7 +19,6 @@ import javafx.scene.control.TextField;
 
 import java.net.URL;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class HomeController implements Initializable {
     private final static String ASCENDING = "Sort (asc)";
@@ -41,13 +40,13 @@ public class HomeController implements Initializable {
 
     public List<Movie> allMovies;
 
-    private final MovieRepository movieRepository = new MockMovieRepository();
+    private final MovieProvider movieProvider = new MockMovieProvider();
 
     private final ObservableList<Movie> observableMovies = FXCollections.observableArrayList();   // automatically updates corresponding UI elements when underlying data changes
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        allMovies = movieRepository.getMovies();
+        allMovies = movieProvider.getMovies();
         observableMovies.addAll(allMovies);         // add dummy data to observable list
 
         // initialize UI stuff

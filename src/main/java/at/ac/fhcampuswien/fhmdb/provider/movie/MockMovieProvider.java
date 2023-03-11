@@ -1,4 +1,4 @@
-package at.ac.fhcampuswien.fhmdb.repositories.movie;
+package at.ac.fhcampuswien.fhmdb.provider.movie;
 
 import at.ac.fhcampuswien.fhmdb.models.Genre;
 import at.ac.fhcampuswien.fhmdb.models.Movie;
@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class MockMovieRepository implements MovieRepository{
+public class MockMovieProvider implements MovieProvider {
     @Override
     public List<Movie> getMovies() {
         List<Movie> movies = new ArrayList<>();

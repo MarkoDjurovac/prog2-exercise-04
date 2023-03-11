@@ -1,9 +1,9 @@
-package at.ac.fhcampuswien.fhmdb.repositories.movie;
+package at.ac.fhcampuswien.fhmdb.provider.movie;
 
 import at.ac.fhcampuswien.fhmdb.models.Movie;
 
 import java.util.List;
 
-public interface MovieRepository {
+public interface MovieProvider {
     public List<Movie> getMovies();
 }
