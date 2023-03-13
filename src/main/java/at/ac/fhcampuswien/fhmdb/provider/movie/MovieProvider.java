@@ -5,5 +5,5 @@ import at.ac.fhcampuswien.fhmdb.models.Movie;
 import java.util.List;
 
 public interface MovieProvider {
-    public List<Movie> getMovies();
+    List<Movie> getMovies();
 }
