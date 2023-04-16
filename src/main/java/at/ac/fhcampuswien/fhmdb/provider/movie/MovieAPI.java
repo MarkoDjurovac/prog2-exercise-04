@@ -10,11 +10,11 @@ import okhttp3.Response;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class MovieAPI implements MovieProvider {
     private static final String BASE_URL = "https://prog2.fh-campuswien.ac.at";
     private static final String ENDPOINT_MOVIES = "/movies";
-    private static final String ENDPOINT_MOVIE = "/movie";
     private OkHttpClient client;
     private Gson gson;
 
@@ -25,7 +25,22 @@ public class MovieAPI implements MovieProvider {
 
     @Override
     public List<Movie> getMovies(){
-        HttpUrl url = HttpUrl.parse(BASE_URL + ENDPOINT_MOVIES);
+        return this.getMoviesWithQuery(null);
+    }
+
+    public List<Movie> getMoviesWithQuery(Map<String, String> queryMap) {
+        HttpUrl.Builder urlBuilder = HttpUrl.parse(BASE_URL + ENDPOINT_MOVIES).newBuilder();
+
+        if(queryMap != null){
+            for (String key: queryMap.keySet()) {
+                urlBuilder.addQueryParameter(key, queryMap.get(key));
+            }
+        }
+
+        return requestMovieList(urlBuilder.build());
+    }
+
+    private List<Movie> requestMovieList(HttpUrl url){
         Request request = new Request.Builder()
                 .url(url)
                 .addHeader("User-Agent", "http.agent")
@@ -39,24 +54,4 @@ public class MovieAPI implements MovieProvider {
             return null;
         }
     }
-
-    public List<Movie> getMoviesWithQuery(String query) {
-        HttpUrl url = HttpUrl.parse(BASE_URL + ENDPOINT_MOVIES).newBuilder()
-                .addQueryParameter("query", query)
-                .build();
-        Request request = new Request.Builder()
-                .url(url)
-                .addHeader("User-Agent", "http.agent")
-                .build();
-        try (Response response = client.newCall(request).execute()) {
-            String json = response.body().string();
-            return Arrays.asList(gson.fromJson(json, Movie[].class));
-        }
-        catch(IOException e){
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    // TODO: implement getMovies with parameters for filtering
 }
