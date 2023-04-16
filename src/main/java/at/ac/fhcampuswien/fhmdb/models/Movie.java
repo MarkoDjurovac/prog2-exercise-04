@@ -16,7 +16,7 @@ public class Movie {
     private List<String> mainCast;
     private double rating;
 
-    public Movie( String id, String title, List<String> genres, int releaseYear, String description, String imageUrl,
+    public Movie( String id, String title, List<Genre> genres, int releaseYear, String description, String imageUrl,
                   int lengthInMinutes, List<String> directors, List<String> writers, List<String> mainCast, double rating) {
 
         if(id == null || id.isBlank()){
@@ -36,6 +36,9 @@ public class Movie {
         }
         if(imageUrl == null || imageUrl.isBlank()){
             throw new IllegalArgumentException("Image URL may not be null or empty");
+        }
+        if(lengthInMinutes < 0 ){
+            throw new IllegalArgumentException("Invalid length in minutes");
         }
         if( directors == null){
             throw new IllegalArgumentException("Directors-List may not be null");
@@ -71,7 +74,7 @@ public class Movie {
         return description;
     }
 
-    public List<String> getGenres() {
+    public List<Genre> getGenres() {
         return new ArrayList<>(genres);
     }
 
