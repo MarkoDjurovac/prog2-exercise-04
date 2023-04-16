@@ -6,7 +6,7 @@ import java.util.List;
 public class Movie {
     private String id;
     private String title;
-    private List<Genre> genres;
+    private List<String> genres;
     private int releaseYear;
     private String description;
     private String imageUrl;
