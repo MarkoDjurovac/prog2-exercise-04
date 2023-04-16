@@ -72,6 +72,7 @@ public class HomeController implements Initializable {
         yearComboBox.setPromptText("Filter by Release Year");
         int[] years = IntStream.range( 1930, Year.now().getValue() + 1 ).toArray(); // generate years from 1930 to current year
         yearComboBox.getItems().addAll( Arrays.stream(years).boxed().collect(Collectors.toList()) );
+        yearComboBox.getItems().add(0);
 
         ratingComboBox.setPromptText("Filter by Rating");
         double[] ratings = DoubleStream.iterate( 0.0, d -> d + 0.5 ).limit( 21 ).toArray(); // generate ratings from 0.0 to 10.0 in steps of 0.5
@@ -99,17 +100,8 @@ public class HomeController implements Initializable {
 
     void searchAction(ActionEvent actionEvent) {
         observableMovies.clear();
-        String searchQuery = searchField.getText().toLowerCase();
-        Genre selectedGenre = genreComboBox.getSelectionModel().getSelectedItem();
-        Integer selectedYear = yearComboBox.getSelectionModel().getSelectedItem();
-        Double selectedRating = ratingComboBox.getSelectionModel().getSelectedItem();
 
-        var filteredMovies = allMovies.stream()
-                .filter(movie -> containsQueryString(movie, searchQuery)
-                        && (selectedGenre == null || movie.hasGenre(selectedGenre.toString()))
-                        && (selectedYear == null || movie.hasReleaseYear(selectedYear))
-                        && (selectedRating == null || movie.hasRating(selectedRating)))
-                .toList();
+        var filteredMovies = movieAPIProvider.getMoviesWithQuery(constructQueryMap());
 
         observableMovies.addAll(filteredMovies);
     }
@@ -152,5 +144,23 @@ public class HomeController implements Initializable {
         return movies.stream()
                 .filter(movie -> movie.getReleaseYear() >= startYear && movie.getReleaseYear() <= endYear)
                 .collect(Collectors.toList());
+    }
+
+    private Map<String, String> constructQueryMap(){
+        var queryMap = new HashMap<String, String>();
+
+        String searchQuery = searchField.getText().toLowerCase();
+        queryMap.put("query", searchQuery);
+
+        Genre selectedGenre = genreComboBox.getSelectionModel().getSelectedItem();
+        if(selectedGenre != null && !selectedGenre.toString().equals("ALL")) queryMap.put("genre", selectedGenre.toString());
+
+        Integer selectedYear = yearComboBox.getSelectionModel().getSelectedItem();
+        if(selectedYear != null && selectedYear > 0) queryMap.put("releaseYear", selectedYear+"");
+
+        Double selectedRating = ratingComboBox.getSelectionModel().getSelectedItem();
+        if(selectedRating != null && selectedRating > 0) queryMap.put("ratingFrom", selectedRating.toString());
+
+        return queryMap;
     }
 }
