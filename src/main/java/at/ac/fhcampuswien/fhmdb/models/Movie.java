@@ -16,7 +16,7 @@ public class Movie {
     private List<String> mainCast;
     private double rating;
 
-    public Movie( String id, String title, List<Genre> genres, int releaseYear, String description, String imageUrl,
+    public Movie( String id, String title, List<String> genres, int releaseYear, String description, String imageUrl,
                   int lengthInMinutes, List<String> directors, List<String> writers, List<String> mainCast, double rating) {
 
         if(id == null || id.isBlank()){
@@ -74,7 +74,7 @@ public class Movie {
         return description;
     }
 
-    public List<Genre> getGenres() {
+    public List<String> getGenres() {
         return new ArrayList<>(genres);
     }
 
