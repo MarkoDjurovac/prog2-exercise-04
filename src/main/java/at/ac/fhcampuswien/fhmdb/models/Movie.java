@@ -4,11 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Movie {
+    private String id;
     private String title;
-    private List<String> genres;
+    private List<Genre> genres;
     private int releaseYear;
     private String description;
+    private String imageUrl;
+    private int lengthInMinutes;
     private List<String> directors;
+    private List<String> writers;
     private List<String> mainCast;
     private double rating;
 
@@ -46,11 +50,15 @@ public class Movie {
             throw new IllegalArgumentException("Invalid rating");
         }
 
+        this.id = id;
         this.title = title;
         this.genres = new ArrayList<>(genres);
         this.releaseYear = releaseYear;
         this.description = description;
+        this.imageUrl = imageUrl;
+        this.lengthInMinutes = lengthInMinutes;
         this.directors = new ArrayList<>(directors);
+        this.writers = new ArrayList<>(writers);
         this.mainCast = new ArrayList<>(mainCast);
         this.rating = rating;
     }
@@ -75,8 +83,39 @@ public class Movie {
         return new ArrayList<>(directors);
     }
 
+    public List<String> getWriters() {
+        return new ArrayList<>(writers);
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public int getLengthInMinutes() {
+        return lengthInMinutes;
+    }
+
+    public double getRating() {
+        return rating;
+    }
+
     public int getReleaseYear() {
         return releaseYear;
     }
 
+    public boolean hasGenre( String genre ) {
+        return genres.contains(genre);
+    }
+
+    public boolean hasReleaseYear( int releaseYear ) {
+        return this.releaseYear == releaseYear;
+    }
+
+    public boolean hasRating( double rating ) {
+        return this.rating == rating;
+    }
 }
