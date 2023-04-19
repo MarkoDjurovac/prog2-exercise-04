@@ -89,7 +89,7 @@ public class HomeController implements Initializable {
     }
 
     private Map<String, String> constructQueryMap(){
-        var queryMap = new HashMap<String, String>();
+        Map<String,String> queryMap = new HashMap<>();
 
         String searchQuery = searchField.getText().toLowerCase();
         queryMap.put("query", searchQuery);
