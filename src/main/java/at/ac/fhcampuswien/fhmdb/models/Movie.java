@@ -28,7 +28,7 @@ public class Movie {
         if(genres == null){
             throw new IllegalArgumentException("Genre-List may not be null");
         }
-        if(releaseYear < 1930 || releaseYear > 2023){
+        if(releaseYear < 1970 || releaseYear > 2023){
             throw new IllegalArgumentException("Invalid releaseYear");
         }
         if(description == null || description.isBlank()){
