@@ -49,7 +49,7 @@ public class Movie {
         if( mainCast == null){
             throw new IllegalArgumentException("MainCast-List may not be null");
         }
-        if(rating < 0 || rating > 10){
+        if(rating < 0.0 || rating > 10.0){
             throw new IllegalArgumentException("Invalid rating");
         }
 
