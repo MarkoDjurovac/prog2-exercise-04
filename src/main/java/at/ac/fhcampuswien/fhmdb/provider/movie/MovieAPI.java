@@ -11,12 +11,13 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class MovieAPI implements MovieProvider {
     private static final String BASE_URL = "https://prog2.fh-campuswien.ac.at";
     private static final String ENDPOINT_MOVIES = "/movies";
-    private OkHttpClient client;
-    private Gson gson;
+    private final OkHttpClient client;
+    private final Gson gson;
 
     public MovieAPI() {
         client = new OkHttpClient();
@@ -29,7 +30,7 @@ public class MovieAPI implements MovieProvider {
     }
 
     public List<Movie> getMoviesWithQuery(Map<String, String> queryMap) {
-        HttpUrl.Builder urlBuilder = HttpUrl.parse(BASE_URL + ENDPOINT_MOVIES).newBuilder();
+        HttpUrl.Builder urlBuilder = Objects.requireNonNull(HttpUrl.parse(BASE_URL + ENDPOINT_MOVIES)).newBuilder();
 
         if(queryMap != null){
             for (String key: queryMap.keySet()) {
@@ -46,6 +47,7 @@ public class MovieAPI implements MovieProvider {
                 .addHeader("User-Agent", "http.agent")
                 .build();
         try (Response response = client.newCall(request).execute()) {
+            assert response.body() != null;
             String json = response.body().string();
             return Arrays.asList(gson.fromJson(json, Movie[].class));
         }

@@ -9,6 +9,7 @@ import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 
 import java.util.stream.Collectors;
 
@@ -29,20 +30,32 @@ public class MovieCell extends ListCell<Movie> {
             setGraphic(null);
         } else {
             this.getStyleClass().add("movie-cell");
+
             title.setText(movie.getTitle());
+
             detail.setText(
                     movie.getDescription() != null
                             ? movie.getDescription()
                             : "No description available"
             );
 
-            genres.setText("Genres: " + String.join(", ", movie.getGenres().stream().map(String::toString).collect(Collectors.toList())));
+            genres.setText(
+                    movie.getGenres() != null
+                        ? ("Genres: " + movie.getGenres().stream().map(String::toString).collect(Collectors.joining(", ")))
+                        : ("No genres available")
+            );
 
-            String str = new StringBuilder().append(movie.getRating()).toString();
-            rating.setText("Rating: " + str);
+            releaseYear.setText(
+                       movie.getReleaseYear() != 0
+                            ? ("Release Year: " + movie.getReleaseYear())
+                            : ("No release year available")
+            );
 
-            String str2 = new StringBuilder().append(movie.getReleaseYear()).toString();
-            releaseYear.setText("Release Year: " + str2);
+            rating.setText(
+                    movie.getRating() != 0
+                        ? ("Rating: " + movie.getRating())
+                        : ("No rating available")
+            );
 
             // color scheme
             title.getStyleClass().add("text-yellow");
@@ -53,7 +66,8 @@ public class MovieCell extends ListCell<Movie> {
             layout.setBackground(new Background(new BackgroundFill(Color.web("#454545"), null, null)));
 
             // layout
-            title.fontProperty().set(title.getFont().font(20));
+            title.getFont();
+            title.fontProperty().set(Font.font(20));
             detail.setMaxWidth(this.getScene().getWidth() - 30);
             detail.setWrapText(true);
             layout.setPadding(new Insets(10));

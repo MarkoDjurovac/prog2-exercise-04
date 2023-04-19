@@ -4,17 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Movie {
-    private String id;
-    private String title;
-    private List<String> genres;
-    private int releaseYear;
-    private String description;
-    private String imageUrl;
-    private int lengthInMinutes;
-    private List<String> directors;
-    private List<String> writers;
-    private List<String> mainCast;
-    private double rating;
+    private final String id;
+    private final String title;
+    private final List<String> genres;
+    private final int releaseYear;
+    private final String description;
+    private final String imageUrl;
+    private final int lengthInMinutes;
+    private final List<String> directors;
+    private final List<String> writers;
+    private final List<String> mainCast;
+    private final double rating;
 
     public Movie( String id, String title, List<String> genres, int releaseYear, String description, String imageUrl,
                   int lengthInMinutes, List<String> directors, List<String> writers, List<String> mainCast, double rating) {
@@ -108,17 +108,5 @@ public class Movie {
 
     public int getReleaseYear() {
         return releaseYear;
-    }
-
-    public boolean hasGenre( String genre ) {
-        return genres.contains(genre);
-    }
-
-    public boolean hasReleaseYear( int releaseYear ) {
-        return this.releaseYear == releaseYear;
-    }
-
-    public boolean hasRating( double rating ) {
-        return this.rating == rating;
     }
 }
