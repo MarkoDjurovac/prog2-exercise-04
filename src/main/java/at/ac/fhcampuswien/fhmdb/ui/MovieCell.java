@@ -87,7 +87,6 @@ public class MovieCell extends ListCell<Movie> {
             layout.setPadding(new Insets(10));
             layout.spacingProperty().set(10);
             layout.alignmentProperty().set(javafx.geometry.Pos.CENTER_LEFT);
-            releaseYear.alignmentProperty().set(Pos.CENTER_RIGHT);
             setGraphic(stackPane);
         }
     }
