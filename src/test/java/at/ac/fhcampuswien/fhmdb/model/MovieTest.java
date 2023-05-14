@@ -1,8 +1,8 @@
-package at.ac.fhcampuswien.fhmdb;
+package at.ac.fhcampuswien.fhmdb.model;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import at.ac.fhcampuswien.fhmdb.models.Movie;
+import at.ac.fhcampuswien.fhmdb.model.Movie;
 import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 

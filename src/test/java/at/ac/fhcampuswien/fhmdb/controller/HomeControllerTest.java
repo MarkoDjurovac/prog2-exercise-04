@@ -1,6 +1,6 @@
-package at.ac.fhcampuswien.fhmdb;
+package at.ac.fhcampuswien.fhmdb.controller;
 
-import at.ac.fhcampuswien.fhmdb.models.Movie;
+import at.ac.fhcampuswien.fhmdb.model.Movie;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
