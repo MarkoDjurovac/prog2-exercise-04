@@ -1,6 +1,8 @@
 package at.ac.fhcampuswien.fhmdb.provider.movie;
 
-import at.ac.fhcampuswien.fhmdb.models.Movie;
+import at.ac.fhcampuswien.fhmdb.ui.ExceptionDialog;
+import at.ac.fhcampuswien.fhmdb.exception.MovieAPIException;
+import at.ac.fhcampuswien.fhmdb.model.Movie;
 import com.google.gson.Gson;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
@@ -8,10 +10,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class MovieAPI implements MovieProvider {
     private static final String BASE_URL = "https://prog2.fh-campuswien.ac.at";
@@ -29,7 +28,7 @@ public class MovieAPI implements MovieProvider {
         return this.getMoviesWithQuery(null);
     }
 
-    public List<Movie> getMoviesWithQuery(Map<String, String> queryMap) {
+    public List<Movie> getMoviesWithQuery(Map<String, String> queryMap){
         HttpUrl.Builder urlBuilder = Objects.requireNonNull(HttpUrl.parse(BASE_URL + ENDPOINT_MOVIES)).newBuilder();
 
         if(queryMap != null){
@@ -47,13 +46,14 @@ public class MovieAPI implements MovieProvider {
                 .addHeader("User-Agent", "http.agent")
                 .build();
         try (Response response = client.newCall(request).execute()) {
-            assert response.body() != null;
             String json = response.body().string();
             return Arrays.asList(gson.fromJson(json, Movie[].class));
         }
-        catch(IOException e){
-            e.printStackTrace();
-            return null;
+        catch(IOException | NullPointerException | IllegalArgumentException e) {
+            MovieAPIException movieApiException = new MovieAPIException("Error fetching data from resource.", e);
+            ExceptionDialog.show(movieApiException);
         }
+
+        return new ArrayList<>();
     }
 }
