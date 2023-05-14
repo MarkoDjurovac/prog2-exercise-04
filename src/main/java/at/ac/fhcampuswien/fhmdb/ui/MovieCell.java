@@ -1,7 +1,7 @@
 package at.ac.fhcampuswien.fhmdb.ui;
 
-import at.ac.fhcampuswien.fhmdb.models.Movie;
-import javafx.event.ActionEvent;
+import at.ac.fhcampuswien.fhmdb.event.ClickEventHandler;
+import at.ac.fhcampuswien.fhmdb.model.Movie;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -16,6 +16,8 @@ import javafx.scene.text.Font;
 import java.util.stream.Collectors;
 
 public class MovieCell extends ListCell<Movie> {
+    private final ClickEventHandler<Movie> onRemoveFromWatchlistClicked;
+    private final ClickEventHandler<Movie> onAddToWatchlistClicked;
     private final Label title = new Label();
     private final Label detail = new Label();
     private final Label genres = new Label();
@@ -27,7 +29,17 @@ public class MovieCell extends ListCell<Movie> {
     private final Label mainCast = new Label();
     private final StackPane stackPane = new StackPane();
     private final Button detailButton = new Button("Show details");
-    private final VBox layout = new VBox(title, detail, genres, releaseYear, lengthInMinutes, directors, writers, mainCast, rating, detailButton);
+    private final Button watchlistButton = new Button("Add to watchlist");
+    private final VBox buttons = new VBox(detailButton, watchlistButton);
+    private final VBox layout = new VBox(title, detail, genres, releaseYear, lengthInMinutes, directors, writers, mainCast, rating, buttons);
+
+    public MovieCell(ClickEventHandler<Movie> onAddToWatchlistClicked, ClickEventHandler<Movie> onRemoveFromWatchlistClicked) {
+        super();
+        this.onAddToWatchlistClicked = onAddToWatchlistClicked;
+        this.onRemoveFromWatchlistClicked = onRemoveFromWatchlistClicked;
+        detailButton.setOnMouseClicked(mouseEvent -> toggleDetails());
+        watchlistButton.setOnMouseClicked(mouseEvent -> this.onAddToWatchlistClicked.onClick(getItem()));
+    }
 
     @Override
     protected void updateItem(Movie movie, boolean empty) {
@@ -40,13 +52,28 @@ public class MovieCell extends ListCell<Movie> {
             this.getStyleClass().add("movie-cell");
 
             // stack pane config
-            StackPane.setAlignment(detailButton, Pos.CENTER_RIGHT);
-            StackPane.setMargin(detailButton, new Insets(0, 10, 0, 0));
-            stackPane.getChildren().setAll(layout, detailButton);
+            StackPane.setAlignment(buttons, Pos.CENTER_RIGHT);
+            StackPane.setMargin(buttons, new Insets(0, 10, 0, 0));
+            stackPane.getChildren().setAll(layout, buttons);
 
-            // button
-            detailButton.setOnAction(this::displayDetails);
+            // buttons config
+            buttons.setSpacing(10);
+            buttons.setPadding(new Insets(0, 0, 0, 0));
+            buttons.setAlignment(Pos.CENTER_RIGHT);
+
+            // detail button
             detailButton.getStyleClass().add("background-yellow");
+
+            // watchlist button
+            watchlistButton.getStyleClass().add("background-yellow");
+
+            if(movie.isInWatchlist()){
+                watchlistButton.setText("Remove from watchlist");
+                watchlistButton.setOnMouseClicked(mouseEvent -> this.onRemoveFromWatchlistClicked.onClick(getItem()));
+            } else {
+                watchlistButton.setText("Add to watchlist");
+                watchlistButton.setOnMouseClicked(mouseEvent -> this.onAddToWatchlistClicked.onClick(getItem()));
+            }
 
             // set labels
             setTitleLabel(movie);
@@ -59,13 +86,7 @@ public class MovieCell extends ListCell<Movie> {
             setMainCastLabel(movie);
             setRatingLabel(movie);
 
-            // bind managed properties of the hidden labels to their visible properties
-            releaseYear.managedProperty().bind(releaseYear.visibleProperty());
-            lengthInMinutes.managedProperty().bind(lengthInMinutes.visibleProperty());
-            directors.managedProperty().bind(directors.visibleProperty());
-            writers.managedProperty().bind(writers.visibleProperty());
-            mainCast.managedProperty().bind(mainCast.visibleProperty());
-            rating.managedProperty().bind(rating.visibleProperty());
+            bindManagedProperties();
 
             // color scheme
             title.getStyleClass().add("text-yellow");
@@ -87,6 +108,7 @@ public class MovieCell extends ListCell<Movie> {
             layout.setPadding(new Insets(10));
             layout.spacingProperty().set(10);
             layout.alignmentProperty().set(javafx.geometry.Pos.CENTER_LEFT);
+
             setGraphic(stackPane);
         }
     }
@@ -171,7 +193,7 @@ public class MovieCell extends ListCell<Movie> {
         mainCast.setVisible(false);
     }
 
-    private void displayDetails(ActionEvent actionEvent) {
+    public void toggleDetails() {
         if(detailButton.getText().equals("Show details")){
             detailButton.setText("Hide details");
             releaseYear.setVisible(true);
@@ -189,5 +211,14 @@ public class MovieCell extends ListCell<Movie> {
             mainCast.setVisible(false);
             rating.setVisible(false);
         }
+    }
+
+    private void bindManagedProperties() {
+        releaseYear.managedProperty().bind(releaseYear.visibleProperty());
+        lengthInMinutes.managedProperty().bind(lengthInMinutes.visibleProperty());
+        directors.managedProperty().bind(directors.visibleProperty());
+        writers.managedProperty().bind(writers.visibleProperty());
+        mainCast.managedProperty().bind(mainCast.visibleProperty());
+        rating.managedProperty().bind(rating.visibleProperty());
     }
 }
