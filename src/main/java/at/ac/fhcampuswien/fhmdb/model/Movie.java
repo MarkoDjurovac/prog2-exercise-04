@@ -1,4 +1,4 @@
-package at.ac.fhcampuswien.fhmdb.models;
+package at.ac.fhcampuswien.fhmdb.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,8 +16,10 @@ public class Movie {
     private final List<String> mainCast;
     private final double rating;
 
+    private boolean isInWatchlist;
+
     public Movie(String id, String title, List<String> genres, int releaseYear, String description, String imgUrl,
-                 int lengthInMinutes, List<String> directors, List<String> writers, List<String> mainCast, double rating) {
+                  int lengthInMinutes, List<String> directors, List<String> writers, List<String> mainCast, double rating) {
 
         if(id == null || id.isBlank()){
             throw new IllegalArgumentException("ID may not be null or empty");
@@ -28,7 +30,7 @@ public class Movie {
         if(genres == null){
             throw new IllegalArgumentException("Genre-List may not be null");
         }
-        if(releaseYear < 1970 || releaseYear > 2023){
+        if(releaseYear < 1960 || releaseYear > 2023){
             throw new IllegalArgumentException("Invalid releaseYear");
         }
         if(description == null || description.isBlank()){
@@ -110,4 +112,11 @@ public class Movie {
         return releaseYear;
     }
 
+    public boolean isInWatchlist() {
+        return isInWatchlist;
+    }
+
+    public void setInWatchlist(boolean value) {
+        this.isInWatchlist = value;
+    }
 }
