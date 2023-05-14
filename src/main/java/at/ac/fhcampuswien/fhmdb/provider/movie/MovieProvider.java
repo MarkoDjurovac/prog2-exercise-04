@@ -1,6 +1,6 @@
 package at.ac.fhcampuswien.fhmdb.provider.movie;
 
-import at.ac.fhcampuswien.fhmdb.models.Movie;
+import at.ac.fhcampuswien.fhmdb.model.Movie;
 
 import java.util.List;
 import java.util.Map;
