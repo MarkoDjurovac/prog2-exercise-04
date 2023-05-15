@@ -42,7 +42,7 @@ public class MovieTest {
     @Test
     public void invalid_releaseYear_2(){
         assertThrows(IllegalArgumentException.class, () -> {
-            Movie mov = new Movie("1", "Test", new ArrayList<String>(), 1969, "Test", "http://test.com",
+            Movie mov = new Movie("1", "Test", new ArrayList<String>(), 1959, "Test", "http://test.com",
                     120, new ArrayList<String>(), new ArrayList<String>(), new ArrayList<String>(), 10.0);
         });
     }
