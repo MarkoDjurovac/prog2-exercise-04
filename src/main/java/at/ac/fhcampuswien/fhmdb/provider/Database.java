@@ -18,17 +18,16 @@ public class Database {
     private ConnectionSource connectionSource;
     private Dao<WatchlistEntity, Long> dao;
 
-    public Database() {
+    public Database() throws DatabaseException {
         createConnectionSource();
         createTables();
     }
 
-    private void createConnectionSource() {
+    private void createConnectionSource() throws DatabaseException {
         try {
             connectionSource = new JdbcConnectionSource(DB_URL, username, password);
         } catch (SQLException | NullPointerException | IllegalArgumentException e) {
-            DatabaseException dbException = new DatabaseException("Failed to create a database connection.", e);
-            ExceptionDialog.show(dbException);
+            throw new DatabaseException("Failed to create a database connection.", e);
         }
     }
 
@@ -36,13 +35,12 @@ public class Database {
         return connectionSource;
     }
 
-    private void createTables() {
+    private void createTables() throws DatabaseException {
         try {
             TableUtils.createTableIfNotExists(connectionSource, WatchlistEntity.class);
             dao = DaoManager.createDao(connectionSource, WatchlistEntity.class);
         } catch (SQLException | NullPointerException | IllegalArgumentException e) {
-            DatabaseException dbException = new DatabaseException("Failed to create tables in the database.", e);
-            ExceptionDialog.show(dbException);
+            throw new DatabaseException("Failed to create tables in the database.", e);
         }
     }
 

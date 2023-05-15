@@ -24,11 +24,11 @@ public class MovieAPI implements MovieProvider {
     }
 
     @Override
-    public List<Movie> getMovies(){
+    public List<Movie> getMovies() throws MovieAPIException {
         return this.getMoviesWithQuery(null);
     }
 
-    public List<Movie> getMoviesWithQuery(Map<String, String> queryMap){
+    public List<Movie> getMoviesWithQuery(Map<String, String> queryMap) throws MovieAPIException {
         HttpUrl.Builder urlBuilder = Objects.requireNonNull(HttpUrl.parse(BASE_URL + ENDPOINT_MOVIES)).newBuilder();
 
         if(queryMap != null){
@@ -40,7 +40,7 @@ public class MovieAPI implements MovieProvider {
         return requestMovieList(urlBuilder.build());
     }
 
-    private List<Movie> requestMovieList(HttpUrl url){
+    private List<Movie> requestMovieList(HttpUrl url) throws MovieAPIException {
         Request request = new Request.Builder()
                 .url(url)
                 .addHeader("User-Agent", "http.agent")
@@ -50,10 +50,7 @@ public class MovieAPI implements MovieProvider {
             return Arrays.asList(gson.fromJson(json, Movie[].class));
         }
         catch(IOException | NullPointerException | IllegalArgumentException e) {
-            MovieAPIException movieApiException = new MovieAPIException("Error fetching data from resource.", e);
-            ExceptionDialog.show(movieApiException);
+            throw new MovieAPIException("Error fetching data from resource.", e);
         }
-
-        return new ArrayList<>();
     }
 }

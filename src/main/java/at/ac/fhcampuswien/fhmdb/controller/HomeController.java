@@ -1,5 +1,7 @@
 package at.ac.fhcampuswien.fhmdb.controller;
 
+import at.ac.fhcampuswien.fhmdb.exception.DatabaseException;
+import at.ac.fhcampuswien.fhmdb.exception.MovieAPIException;
 import at.ac.fhcampuswien.fhmdb.model.Genre;
 import at.ac.fhcampuswien.fhmdb.model.Movie;
 import at.ac.fhcampuswien.fhmdb.model.WatchlistEntity;
@@ -7,6 +9,7 @@ import at.ac.fhcampuswien.fhmdb.provider.Database;
 import at.ac.fhcampuswien.fhmdb.provider.movie.MovieAPI;
 import at.ac.fhcampuswien.fhmdb.provider.movie.MovieProvider;
 import at.ac.fhcampuswien.fhmdb.event.ClickEventHandler;
+import at.ac.fhcampuswien.fhmdb.ui.ExceptionDialog;
 import at.ac.fhcampuswien.fhmdb.ui.MovieCell;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
@@ -14,6 +17,7 @@ import com.jfoenix.controls.JFXListView;
 import javafx.animation.PauseTransition;
 import javafx.event.ActionEvent;
 import javafx.scene.CacheHint;
+import javafx.scene.chart.PieChart;
 import javafx.util.Duration;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -67,10 +71,19 @@ public class HomeController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        Database database = new Database();
-        watchlistRepository = new WatchlistRepository(database.getWatchlistDao());
+        try{
+            Database database = new Database();
+            watchlistRepository = new WatchlistRepository(database.getWatchlistDao());
+        } catch (DatabaseException e){
+            ExceptionDialog.show(e);
+        }
 
-        allMovies = movieAPIProvider.getMovies();
+        try{
+            allMovies = movieAPIProvider.getMovies();
+        } catch (MovieAPIException e) {
+            ExceptionDialog.show(e);
+        }
+
 
         observableMovies.addAll(allMovies);         // add API data to observable list
 
@@ -103,9 +116,15 @@ public class HomeController implements Initializable {
     }
 
     void searchAction(ActionEvent actionEvent) {
-        observableMovies.clear();
-        List<Movie> filteredMovies = movieAPIProvider.getMoviesWithQuery(constructQueryMap());
-        observableMovies.addAll(filteredMovies);
+        try{
+            List<Movie> filteredMovies = movieAPIProvider.getMoviesWithQuery(constructQueryMap());
+            observableMovies.clear();
+            observableMovies.addAll(filteredMovies);
+        }catch (MovieAPIException e){
+            ExceptionDialog.show(e);
+            return;
+        }
+
 
         movieListView.refresh();
     }
@@ -205,17 +224,33 @@ public class HomeController implements Initializable {
     private final ClickEventHandler<Movie> onAddToWatchlistClicked = (clickedItem) ->
     {
         WatchlistEntity watchlistEntity = new WatchlistEntity(clickedItem);
-        watchlistRepository.addToWatchlist(watchlistEntity);
+        try{
+            watchlistRepository.addToWatchlist(watchlistEntity);
+        } catch (DatabaseException e){
+            ExceptionDialog.show(e);
+        }
     };
 
     private final ClickEventHandler<Movie> onRemoveFromWatchlistClicked = (clickedItem) -> {
         WatchlistEntity watchlistEntity = new WatchlistEntity(clickedItem);
-        watchlistRepository.removeFromWatchlist(watchlistEntity);
-        updateView();
+        try{
+            watchlistRepository.removeFromWatchlist(watchlistEntity);
+            updateView();
+
+        } catch (DatabaseException e){
+            ExceptionDialog.show(e);
+        }
     };
 
     private void updateView(){
-        List<WatchlistEntity> repositoryList = watchlistRepository.getAll();
+        List<WatchlistEntity> repositoryList;
+        try{
+            repositoryList = watchlistRepository.getAll();
+        } catch (DatabaseException e){
+            ExceptionDialog.show(e);
+            return;
+        }
+
         List<Movie> watchlist = convertWatchlistEntitiesToMovies(repositoryList);
         observableMovies.clear();
         observableMovies.addAll(watchlist);
