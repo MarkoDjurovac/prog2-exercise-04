@@ -1,7 +1,6 @@
 package at.ac.fhcampuswien.fhmdb.provider;
 
 import at.ac.fhcampuswien.fhmdb.exception.DatabaseException;
-import at.ac.fhcampuswien.fhmdb.ui.ExceptionDialog;
 import at.ac.fhcampuswien.fhmdb.model.WatchlistEntity;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
@@ -12,7 +11,7 @@ import com.j256.ormlite.table.TableUtils;
 import java.sql.SQLException;
 
 public class Database {
-    private final String DB_URL = "jdbc:h2:mem:fhmdb;DB_CLOSE_DELAY=-1"; // For in-memory database
+    private final String DB_URL = "jdbc:h2:file:./db/fhmdb;DB_CLOSE_DELAY=-1"; // For in-memory database
     private final String username = "";
     private final String password = "";
     private ConnectionSource connectionSource;
