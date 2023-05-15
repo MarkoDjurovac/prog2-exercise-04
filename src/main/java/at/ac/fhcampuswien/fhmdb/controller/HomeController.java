@@ -15,6 +15,7 @@ import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXListView;
 import javafx.animation.PauseTransition;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.scene.CacheHint;
 import javafx.scene.chart.PieChart;
@@ -76,12 +77,14 @@ public class HomeController implements Initializable {
             watchlistRepository = new WatchlistRepository(database.getWatchlistDao());
         } catch (DatabaseException e){
             ExceptionDialog.show(e);
+            watchlistRepository = new WatchlistRepository();
         }
 
         try{
             allMovies = movieAPIProvider.getMovies();
         } catch (MovieAPIException e) {
             ExceptionDialog.show(e);
+            allMovies = new ArrayList<>();
         }
 
 
@@ -101,11 +104,11 @@ public class HomeController implements Initializable {
         watchlistBtn.setOnAction(this::toggleWatchlistMode);
 
         PauseTransition searchDebounce = new PauseTransition(Duration.millis(500));
-        searchDebounce.setOnFinished(this::searchAction);
+        searchDebounce.setOnFinished(event -> Platform.runLater(() -> searchAction(event)));
         searchField.textProperty().addListener((observable, old, newVal) -> searchDebounce.playFromStart());
     }
 
-    void toggleSortOrder(ActionEvent actionEvent) {
+    private void toggleSortOrder(ActionEvent actionEvent) {
         if(sortBtn.getText().equals(ASCENDING)) {
             observableMovies.sort(Comparator.comparing(Movie::getTitle));
             sortBtn.setText(DESCENDING);
@@ -115,7 +118,7 @@ public class HomeController implements Initializable {
         }
     }
 
-    void searchAction(ActionEvent actionEvent) {
+    private void searchAction(ActionEvent actionEvent) {
         try{
             List<Movie> filteredMovies = movieAPIProvider.getMoviesWithQuery(constructQueryMap());
             observableMovies.clear();
@@ -248,7 +251,7 @@ public class HomeController implements Initializable {
             repositoryList = watchlistRepository.getAll();
         } catch (DatabaseException e){
             ExceptionDialog.show(e);
-            return;
+            repositoryList = new ArrayList<>();
         }
 
         List<Movie> watchlist = convertWatchlistEntitiesToMovies(repositoryList);

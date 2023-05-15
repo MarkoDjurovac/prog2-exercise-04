@@ -8,7 +8,7 @@ public class ExceptionDialog
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("An error occurred!");
         alert.setHeaderText(e.getMessage());
-        alert.setContentText(String.valueOf(e.getCause()));
+        alert.setContentText("Error caused by:\n\n" + e.getCause());
         alert.showAndWait();
     }
 }

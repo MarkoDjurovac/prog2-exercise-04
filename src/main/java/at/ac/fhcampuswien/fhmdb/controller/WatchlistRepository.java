@@ -16,6 +16,10 @@ public class WatchlistRepository {
         this.dao = dao;
     }
 
+    public WatchlistRepository(){
+        this.dao = null;
+    }
+
     public void removeFromWatchlist(WatchlistEntity movie) throws DatabaseException {
         try {
             String apiId = movie.getApiId();
@@ -23,7 +27,7 @@ public class WatchlistRepository {
             deleteBuilder.where().eq("apiId", apiId);
             dao.delete(deleteBuilder.prepare());
         } catch (SQLException | NullPointerException | IllegalArgumentException e) {
-            throw new DatabaseException("Failed to create a connection", e);
+            throw new DatabaseException("Failed to remove entity from database.", e);
         }
     }
 
@@ -31,7 +35,7 @@ public class WatchlistRepository {
         try {
             return dao.queryForAll();
         } catch (SQLException | NullPointerException | IllegalArgumentException e) {
-            throw new DatabaseException("Failed to create a connection", e);
+            throw new DatabaseException("Failed to fetch entities from database.", e);
         }
     }
 
@@ -41,7 +45,7 @@ public class WatchlistRepository {
                 dao.create(movie);
             }
         } catch (SQLException | NullPointerException | IllegalArgumentException e) {
-            throw new DatabaseException("Failed to create a connection", e);
+            throw new DatabaseException("Failed to add entity to database.", e);
         }
     }
 }
