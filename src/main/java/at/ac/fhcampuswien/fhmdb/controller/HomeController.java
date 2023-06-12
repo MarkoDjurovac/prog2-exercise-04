@@ -8,8 +8,13 @@ import at.ac.fhcampuswien.fhmdb.model.WatchlistEntity;
 import at.ac.fhcampuswien.fhmdb.provider.Database;
 import at.ac.fhcampuswien.fhmdb.provider.movie.MovieAPI;
 import at.ac.fhcampuswien.fhmdb.provider.movie.MovieProvider;
-import at.ac.fhcampuswien.fhmdb.event.ClickEventHandler;
-import at.ac.fhcampuswien.fhmdb.ui.ExceptionDialog;
+import at.ac.fhcampuswien.fhmdb.ui.ClickEventHandler;
+import at.ac.fhcampuswien.fhmdb.sorting.AscendingState;
+import at.ac.fhcampuswien.fhmdb.sorting.DescendingState;
+import at.ac.fhcampuswien.fhmdb.sorting.SortingState;
+import at.ac.fhcampuswien.fhmdb.sorting.UnsortedState;
+import at.ac.fhcampuswien.fhmdb.ui.WatchlistAlert;
+import at.ac.fhcampuswien.fhmdb.ui.ExceptionAlert;
 import at.ac.fhcampuswien.fhmdb.ui.MovieCell;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
@@ -17,8 +22,6 @@ import com.jfoenix.controls.JFXListView;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
-import javafx.scene.CacheHint;
-import javafx.scene.chart.PieChart;
 import javafx.util.Duration;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -33,9 +36,7 @@ import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
-public class HomeController implements Initializable {
-    private final static String ASCENDING = "Sort (asc)";
-    private final static String DESCENDING = "Sort (desc)";
+public class HomeController implements Initializable, Observer {
 
     @FXML
     public JFXButton searchBtn;
@@ -65,30 +66,32 @@ public class HomeController implements Initializable {
     public JFXButton watchlistBtn;
 
     public List<Movie> allMovies;
-
     private final MovieProvider movieAPIProvider = new MovieAPI();
     private final ObservableList<Movie> observableMovies = FXCollections.observableArrayList();   // automatically updates corresponding UI elements when underlying data changes
     private WatchlistRepository watchlistRepository;
+    private SortingState sortingState;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        try{
+        try {
             Database database = new Database();
-            watchlistRepository = new WatchlistRepository(database.getWatchlistDao());
-        } catch (DatabaseException e){
-            ExceptionDialog.show(e);
-            watchlistRepository = new WatchlistRepository();
+            watchlistRepository = WatchlistRepository.getInstance(database.getWatchlistDao());
+            watchlistRepository.addObserver(this);
+        } catch (DatabaseException e) {
+            ExceptionAlert.show(e);
+            watchlistRepository = WatchlistRepository.getInstance(null);
         }
 
-        try{
+        try {
             allMovies = movieAPIProvider.getMovies();
         } catch (MovieAPIException e) {
-            ExceptionDialog.show(e);
+            ExceptionAlert.show(e);
             allMovies = new ArrayList<>();
         }
 
-
         observableMovies.addAll(allMovies);         // add API data to observable list
+
+        this.sortingState = new UnsortedState();
 
         // initialize UI stuff
         movieListView.setItems(observableMovies);   // set data of observable list to list view
@@ -108,31 +111,52 @@ public class HomeController implements Initializable {
         searchField.textProperty().addListener((observable, old, newVal) -> searchDebounce.playFromStart());
     }
 
+    @Override
+    public void update(Object arg) {
+        boolean operationSuccessful = (Boolean) arg;
+        Platform.runLater(() -> {
+            if (operationSuccessful) {
+                WatchlistAlert.show("Watchlist", "The movie was successfully added to the watchlist.");
+            } else {
+                WatchlistAlert.show("Watchlist", "The movie could not be added to the watchlist. It might already be on the watchlist.");
+            }
+        });
+    }
+
+    /*
     private void toggleSortOrder(ActionEvent actionEvent) {
         if(sortBtn.getText().equals(ASCENDING)) {
-            observableMovies.sort(Comparator.comparing(Movie::getTitle));
+            sortingState = new AscendingState();
             sortBtn.setText(DESCENDING);
         } else {
-            observableMovies.sort(Comparator.comparing(Movie::getTitle).reversed());
+            sortingState = new DescendingState();
             sortBtn.setText(ASCENDING);
         }
+
+        sortingState.sort(observableMovies);
+    }
+     */
+
+    private void toggleSortOrder(ActionEvent actionEvent) {
+        sortingState.next(this);
+        sortMovies();
     }
 
     private void searchAction(ActionEvent actionEvent) {
-        try{
+        try {
             List<Movie> filteredMovies = movieAPIProvider.getMoviesWithQuery(constructQueryMap());
             observableMovies.clear();
             observableMovies.addAll(filteredMovies);
-        }catch (MovieAPIException e){
-            ExceptionDialog.show(e);
+        } catch (MovieAPIException e) {
+            ExceptionAlert.show(e);
             return;
         }
 
-
+        sortingState.sort(observableMovies);
         movieListView.refresh();
     }
 
-    private Map<String, String> constructQueryMap(){
+    private Map<String, String> constructQueryMap() {
         Map<String,String> queryMap = new HashMap<>();
 
         String searchQuery = searchField.getText().toLowerCase();
@@ -152,27 +176,26 @@ public class HomeController implements Initializable {
     public void resetAction(ActionEvent actionEvent) {
         observableMovies.clear();
         observableMovies.addAll(allMovies);
-
         searchField.clear();
         genreComboBox.getSelectionModel().clearSelection();
         yearComboBox.getSelectionModel().clearSelection();
         ratingComboBox.getSelectionModel().clearSelection();
-
+        sortingState.sort(observableMovies);
         movieListView.refresh();
     }
 
-    public void initializeGenreSelector(){
+    public void initializeGenreSelector() {
         genreComboBox.setPromptText("Filter by Genre");
         genreComboBox.getItems().addAll( Genre.values() );
     }
 
-    public void initializeReleaseYearSelector(){
+    public void initializeReleaseYearSelector() {
         yearComboBox.setPromptText("Filter by Release Year");
         int[] years = IntStream.range( 1970, Year.now().getValue() + 1 ).toArray(); // generate years from 1970 to current year
         yearComboBox.getItems().addAll( Arrays.stream(years).boxed().toList());
     }
 
-    public void initializeRatingSelector(){
+    public void initializeRatingSelector() {
         ratingComboBox.setPromptText("Filter by Rating");
         double[] ratings = DoubleStream.iterate( 0.0, d -> d + 0.5 ).limit( 21 ).toArray(); // generate ratings from 0.0 to 10.0 in steps of 0.5
         ratingComboBox.getItems().addAll( Arrays.stream(ratings).boxed().toList());
@@ -211,11 +234,11 @@ public class HomeController implements Initializable {
                 .collect(Collectors.toList());
     }
 
-    private void toggleWatchlistMode( ActionEvent actionEvent ){
-        if( watchlistBtn.getText().equals( "Open watchlist" ) ){
+    private void toggleWatchlistMode(ActionEvent actionEvent) {
+        if(watchlistBtn.getText().equals("Open watchlist")) {
             hideTopBar();
             updateView();
-            watchlistBtn.setText( "Close watchlist" );
+            watchlistBtn.setText("Close watchlist");
         } else {
             showTopBar();
             observableMovies.clear();
@@ -224,33 +247,35 @@ public class HomeController implements Initializable {
         }
     }
 
-    private final ClickEventHandler<Movie> onAddToWatchlistClicked = (clickedItem) ->
-    {
+    private final ClickEventHandler<Movie> onAddToWatchlistClicked = (clickedItem) -> {
         WatchlistEntity watchlistEntity = new WatchlistEntity(clickedItem);
-        try{
+
+        try {
             watchlistRepository.addToWatchlist(watchlistEntity);
-        } catch (DatabaseException e){
-            ExceptionDialog.show(e);
+        } catch (DatabaseException e) {
+            ExceptionAlert.show(e);
         }
     };
 
     private final ClickEventHandler<Movie> onRemoveFromWatchlistClicked = (clickedItem) -> {
         WatchlistEntity watchlistEntity = new WatchlistEntity(clickedItem);
+
         try{
             watchlistRepository.removeFromWatchlist(watchlistEntity);
             updateView();
 
         } catch (DatabaseException e){
-            ExceptionDialog.show(e);
+            ExceptionAlert.show(e);
         }
     };
 
-    private void updateView(){
+    private void updateView() {
         List<WatchlistEntity> repositoryList;
-        try{
+
+        try {
             repositoryList = watchlistRepository.getAll();
         } catch (DatabaseException e){
-            ExceptionDialog.show(e);
+            ExceptionAlert.show(e);
             repositoryList = new ArrayList<>();
         }
 
@@ -286,7 +311,7 @@ public class HomeController implements Initializable {
         return movieList;
     }
 
-    private void hideTopBar(){
+    private void hideTopBar() {
         sortBtn.setVisible(false);
         searchField.setVisible(false);
         genreComboBox.setVisible(false);
@@ -304,5 +329,17 @@ public class HomeController implements Initializable {
         ratingComboBox.setVisible(true);
         searchBtn.setVisible(true);
         resetBtn.setVisible(true);
+    }
+
+    public void setSortState(SortingState sortingState) {
+        this.sortingState = sortingState;
+    }
+
+    public void sortMovies() {
+        sortingState.sort(observableMovies);
+    }
+
+    public void updateSortButton(String text) {
+        sortBtn.setText(text);
     }
 }
