@@ -1,6 +1,5 @@
 package at.ac.fhcampuswien.fhmdb.ui;
 
-import at.ac.fhcampuswien.fhmdb.event.ClickEventHandler;
 import at.ac.fhcampuswien.fhmdb.model.Movie;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -67,7 +66,7 @@ public class MovieCell extends ListCell<Movie> {
             // watchlist button
             watchlistButton.getStyleClass().add("background-yellow");
 
-            if(movie.isInWatchlist()){
+            if(movie.isInWatchlist()) {
                 watchlistButton.setText("Remove from watchlist");
                 watchlistButton.setOnMouseClicked(mouseEvent -> this.onRemoveFromWatchlistClicked.onClick(getItem()));
             } else {
