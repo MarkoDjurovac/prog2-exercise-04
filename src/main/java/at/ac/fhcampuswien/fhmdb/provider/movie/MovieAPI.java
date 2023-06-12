@@ -1,6 +1,5 @@
 package at.ac.fhcampuswien.fhmdb.provider.movie;
 
-import at.ac.fhcampuswien.fhmdb.ui.ExceptionDialog;
 import at.ac.fhcampuswien.fhmdb.exception.MovieAPIException;
 import at.ac.fhcampuswien.fhmdb.model.Movie;
 import com.google.gson.Gson;
@@ -29,15 +28,16 @@ public class MovieAPI implements MovieProvider {
     }
 
     public List<Movie> getMoviesWithQuery(Map<String, String> queryMap) throws MovieAPIException {
-        HttpUrl.Builder urlBuilder = Objects.requireNonNull(HttpUrl.parse(BASE_URL + ENDPOINT_MOVIES)).newBuilder();
+        MovieAPIURLBuilder builder = new MovieAPIURLBuilder(BASE_URL + ENDPOINT_MOVIES);
 
         if(queryMap != null){
-            for (String key: queryMap.keySet()) {
-                urlBuilder.addQueryParameter(key, queryMap.get(key));
-            }
+            builder.query(queryMap.get("query"));
+            builder.genre(queryMap.get("genre"));
+            builder.releaseYear(queryMap.get("releaseYear"));
+            builder.ratingFrom(queryMap.get("ratingFrom"));
         }
 
-        return requestMovieList(urlBuilder.build());
+        return requestMovieList(builder.build());
     }
 
     private List<Movie> requestMovieList(HttpUrl url) throws MovieAPIException {
