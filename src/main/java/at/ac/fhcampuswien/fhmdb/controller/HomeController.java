@@ -8,11 +8,11 @@ import at.ac.fhcampuswien.fhmdb.model.WatchlistEntity;
 import at.ac.fhcampuswien.fhmdb.provider.Database;
 import at.ac.fhcampuswien.fhmdb.provider.movie.MovieAPI;
 import at.ac.fhcampuswien.fhmdb.provider.movie.MovieProvider;
+import at.ac.fhcampuswien.fhmdb.sorting.Ascending;
+import at.ac.fhcampuswien.fhmdb.sorting.Descending;
+import at.ac.fhcampuswien.fhmdb.sorting.Unsorted;
 import at.ac.fhcampuswien.fhmdb.ui.ClickEventHandler;
-import at.ac.fhcampuswien.fhmdb.sorting.AscendingState;
-import at.ac.fhcampuswien.fhmdb.sorting.DescendingState;
-import at.ac.fhcampuswien.fhmdb.sorting.SortingState;
-import at.ac.fhcampuswien.fhmdb.sorting.UnsortedState;
+import at.ac.fhcampuswien.fhmdb.sorting.SortedState;
 import at.ac.fhcampuswien.fhmdb.ui.WatchlistAlert;
 import at.ac.fhcampuswien.fhmdb.ui.ExceptionAlert;
 import at.ac.fhcampuswien.fhmdb.ui.MovieCell;
@@ -38,6 +38,8 @@ import java.util.stream.IntStream;
 
 public class HomeController implements Initializable, Observer {
 
+    private final static String ASCENDING = "Sort (asc)";
+    private final static String DESCENDING = "Sort (desc)";
     @FXML
     public JFXButton searchBtn;
 
@@ -69,7 +71,7 @@ public class HomeController implements Initializable, Observer {
     private final MovieProvider movieAPIProvider = new MovieAPI();
     private final ObservableList<Movie> observableMovies = FXCollections.observableArrayList();   // automatically updates corresponding UI elements when underlying data changes
     private WatchlistRepository watchlistRepository;
-    private SortingState sortingState;
+    private SortedState sortingState;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -91,7 +93,7 @@ public class HomeController implements Initializable, Observer {
 
         observableMovies.addAll(allMovies);         // add API data to observable list
 
-        this.sortingState = new UnsortedState();
+        this.sortingState = new Unsorted(this);
 
         // initialize UI stuff
         movieListView.setItems(observableMovies);   // set data of observable list to list view
@@ -123,22 +125,7 @@ public class HomeController implements Initializable, Observer {
         });
     }
 
-    /*
     private void toggleSortOrder(ActionEvent actionEvent) {
-        if(sortBtn.getText().equals(ASCENDING)) {
-            sortingState = new AscendingState();
-            sortBtn.setText(DESCENDING);
-        } else {
-            sortingState = new DescendingState();
-            sortBtn.setText(ASCENDING);
-        }
-
-        sortingState.sort(observableMovies);
-    }
-     */
-
-    private void toggleSortOrder(ActionEvent actionEvent) {
-        sortingState.next(this);
         sortMovies();
     }
 
@@ -152,7 +139,7 @@ public class HomeController implements Initializable, Observer {
             return;
         }
 
-        sortingState.sort(observableMovies);
+        reapplySortingState();
         movieListView.refresh();
     }
 
@@ -180,7 +167,7 @@ public class HomeController implements Initializable, Observer {
         genreComboBox.getSelectionModel().clearSelection();
         yearComboBox.getSelectionModel().clearSelection();
         ratingComboBox.getSelectionModel().clearSelection();
-        sortingState.sort(observableMovies);
+        reapplySortingState();
         movieListView.refresh();
     }
 
@@ -331,15 +318,31 @@ public class HomeController implements Initializable, Observer {
         resetBtn.setVisible(true);
     }
 
-    public void setSortState(SortingState sortingState) {
+    public void setSortState(SortedState sortingState) {
         this.sortingState = sortingState;
     }
 
     public void sortMovies() {
-        sortingState.sort(observableMovies);
+        if(sortBtn.getText().equals(ASCENDING)) {
+            sortingState.sortAscending(observableMovies);
+            sortBtn.setText(DESCENDING);
+        } else {
+            sortingState.sortDescending(observableMovies);
+            sortBtn.setText(ASCENDING);
+        }
     }
+    private void reapplySortingState(){
+        if(sortingState instanceof Ascending){
+            sortingState = new Unsorted(this);
+            sortingState.sortAscending(observableMovies);
+            return;
+        }
+        if(sortingState instanceof Descending){
+            sortingState = new Unsorted(this);
+            sortingState.sortDescending(observableMovies);
+            return;
+        }
 
-    public void updateSortButton(String text) {
-        sortBtn.setText(text);
+        sortingState = new Unsorted(this);
     }
 }
