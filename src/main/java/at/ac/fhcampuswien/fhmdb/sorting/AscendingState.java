@@ -10,7 +10,7 @@ public class AscendingState implements SortingState {
     @Override
     public void next(HomeController context) {
         context.setSortState(new DescendingState());
-        context.updateSortButton("Sort (desc)");
+        context.updateSortButton("Sort (asc)");
     }
 
     @Override

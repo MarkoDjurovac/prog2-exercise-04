@@ -9,8 +9,8 @@ import java.util.List;
 public class DescendingState implements SortingState {
     @Override
     public void next(HomeController context) {
-        context.setSortState(new UnsortedState());
-        context.updateSortButton("Sort");
+        context.setSortState(new AscendingState());
+        context.updateSortButton("Sort (desc)");
     }
 
     @Override
