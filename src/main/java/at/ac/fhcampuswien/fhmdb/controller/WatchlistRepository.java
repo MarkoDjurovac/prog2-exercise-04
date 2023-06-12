@@ -1,7 +1,6 @@
 package at.ac.fhcampuswien.fhmdb.controller;
 
 import at.ac.fhcampuswien.fhmdb.exception.DatabaseException;
-import at.ac.fhcampuswien.fhmdb.ui.ExceptionDialog;
 import at.ac.fhcampuswien.fhmdb.model.WatchlistEntity;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.stmt.DeleteBuilder;
