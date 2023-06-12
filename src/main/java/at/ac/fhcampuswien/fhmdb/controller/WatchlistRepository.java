@@ -7,17 +7,27 @@ import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.stmt.DeleteBuilder;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
-public class WatchlistRepository {
+public class WatchlistRepository implements Observable {
+    private static WatchlistRepository instance = null;
     private final Dao<WatchlistEntity, Long> dao;
+    private List<Observer> observers = new ArrayList<>();
+    private boolean changed = false;
 
-    public WatchlistRepository(Dao<WatchlistEntity, Long> dao) {
+    private WatchlistRepository( Dao<WatchlistEntity, Long> dao ) {
         this.dao = dao;
     }
 
-    public WatchlistRepository(){
-        this.dao = null;
+    public static WatchlistRepository getInstance(Dao<WatchlistEntity, Long> dao) {
+        if (instance == null) {
+            if (dao != null)
+                instance = new WatchlistRepository(dao);
+            else
+                instance = new WatchlistRepository(null);
+        }
+        return instance;
     }
 
     public void removeFromWatchlist(WatchlistEntity movie) throws DatabaseException {
@@ -43,9 +53,45 @@ public class WatchlistRepository {
         try {
             if(dao.queryForEq("apiId", movie.getApiId()).size() < 1) {
                 dao.create(movie);
+                setChanged();
+                notifyObservers();
+            }
+            else {
+                notifyObservers();
             }
         } catch (SQLException | NullPointerException | IllegalArgumentException e) {
             throw new DatabaseException("Failed to add entity to database.", e);
         }
+    }
+
+    @Override
+    public void addObserver(Observer o) {
+        if (o == null) {
+            throw new NullPointerException();
+        }
+        if(!observers.contains(o)) {
+            observers.add(o);
+        }
+    }
+
+    @Override
+    public void removeObserver(Observer o) {
+        observers.remove(o);
+    }
+
+    @Override
+    public void notifyObservers() {
+        for (Observer observer : observers) {
+            observer.update(this.changed);
+        }
+        clearChanged();
+    }
+
+    protected void setChanged() {
+        this.changed = true;
+    }
+
+    protected void clearChanged() {
+        this.changed = false;
     }
 }
